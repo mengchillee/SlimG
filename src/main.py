@@ -27,17 +27,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def to_regularizer(model, lamda_1, lamda_2):
+def to_regularizer(model, lambda_1, lambda_2):
     out = []
     for j, (name, param) in enumerate(model.named_parameters()):
         if param.requires_grad and 'bias' not in name:
-            out.append(lamda_1 * torch.abs(param).sum())
-            out.append(lamda_2 * torch.sqrt(torch.pow(param, 2).sum()))
+            out.append(lambda_1 * torch.abs(param).sum())
+            out.append(lambda_2 * torch.sqrt(torch.pow(param, 2).sum()))
     return torch.stack(out).sum()
 
 
 def train_model(args, model, features, labels, edge_index, trn_nodes,
-                val_nodes, lamda_1, lamda_2):
+                val_nodes, lambda_1, lambda_2):
     loss_func = nn.CrossEntropyLoss()
     optimizer = optim.LBFGS(model.parameters())
 
@@ -58,8 +58,8 @@ def train_model(args, model, features, labels, edge_index, trn_nodes,
         labels_ = labels[trn_nodes]
         loss1 = loss_func(pred_, labels_)
 
-        if lamda_1 > 0 or lamda_2 > 0:
-            loss2 = to_regularizer(model, lamda_1, lamda_2)
+        if lambda_1 > 0 or lambda_2 > 0:
+            loss2 = to_regularizer(model, lambda_1, lambda_2)
         else:
             loss2 = 0
 
@@ -137,8 +137,8 @@ def main():
             search_range_2 = [1e-3, 1e-4, 1e-5, 1e-6]
 
             val_acc_dict = {}
-            for lamda_1 in search_range_1:
-                for lamda_2 in search_range_2:
+            for lambda_1 in search_range_1:
+                for lambda_2 in search_range_2:
                     model.reset_parameters()
                     _, acc, _ = train_model(
                             args=args,
@@ -148,9 +148,9 @@ def main():
                             edge_index=edge_index,
                             trn_nodes=trn_nodes,
                             val_nodes=val_nodes,
-                            lamda_1=lamda_1,
-                            lamda_2=lamda_2)
-                    val_acc_dict[(lamda_1, lamda_2)] = acc      
+                            lambda_1=lambda_1,
+                            lambda_2=lambda_2)
+                    val_acc_dict[(lambda_1, lambda_2)] = acc      
 
             return max(val_acc_dict, key=val_acc_dict.get)
 
@@ -172,8 +172,8 @@ def main():
                     edge_index=edge_index,
                     trn_nodes=trn_nodes,
                     val_nodes=val_nodes,
-                    lamda_1=best_parm[0],
-                    lamda_2=best_parm[1])
+                    lambda_1=best_parm[0],
+                    lambda_2=best_parm[1])
 
             acc_arr.append(evaluate(test_nodes))
 
