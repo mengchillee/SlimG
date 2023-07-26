@@ -3,7 +3,6 @@ import os
 from os import path
 import scipy
 import gdown
-from collections import Counter
 import pandas as pd
 
 import torch
@@ -15,7 +14,7 @@ from torch_geometric.utils import is_undirected, to_undirected
 from torch_geometric.data import Data
 import torch_geometric.transforms as T
 
-from data.synthetic import Synthetic, to_adj_matrix
+from data.synthetic import Synthetic
 from utils import ROOT
 
 
