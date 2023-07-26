@@ -12,7 +12,6 @@ from torch_geometric.datasets import Planetoid, WikipediaNetwork, Actor, Amazon,
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.utils import is_undirected, to_undirected
 from torch_geometric.data import Data
-import torch_geometric.transforms as T
 
 from data.synthetic import Synthetic
 from utils import ROOT
