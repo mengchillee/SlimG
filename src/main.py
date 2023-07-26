@@ -7,8 +7,6 @@ from tqdm import tqdm
 import torch
 from torch import nn, optim
 
-from sklearn.model_selection import StratifiedKFold
-
 import utils
 from data import load_data, split_nodes
 from models import load_model
