@@ -8,7 +8,7 @@ https://dl.acm.org/doi/10.1145/3580305.3599413
 
 Please cite the paper as:
 
-    @inproceedings{lee2021InfoShield,
+    @inproceedings{yoo2023less,
       title={Less is More: SlimG for Accurate, Robust, and Interpretable Graph Mining},
       author={Yoo, Jaemin and Lee, Meng-Chieh and Shekhar, Shubhranshu and Faloutsos, Christos},
       booktitle={Proceedings of the 29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
