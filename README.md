@@ -2,7 +2,7 @@
 
 ------------
 
-Yoo, J.*, Lee, M. C.*, Shekhar, S., & Faloutsos, C. (2023, August). Less is More: SlimG for Accurate, Robust, and Interpretable Graph Mining. *29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining*, 2023.
+Yoo, J.\*, Lee, M. C.\*, Shekhar, S., & Faloutsos, C. (2023, August). Less is More: SlimG for Accurate, Robust, and Interpretable Graph Mining. *29th ACM SIGKDD Conference on Knowledge Discovery and Data Mining*, 2023.
 
 https://dl.acm.org/doi/10.1145/3580305.3599413
 
