@@ -1,20 +1,19 @@
 import argparse
 import io
-from distutils.util import strtobool
 import numpy as np
 from tqdm import tqdm
 
 import torch
 from torch import nn, optim
 
-import utils
-from data import load_data, split_nodes
-from models import load_model
+from . import utils
+from .data import load_data, split_nodes
+from .models import load_model
 
 
 def parse_args():
     def str2bool(x):
-        return bool(strtobool(x))
+        return x.lower() in ('true', '1', 'yes', 'y', 't')
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=str, default=f'{utils.ROOT}/out/temp')
@@ -22,6 +21,10 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--max-epochs', type=int, default=100)
     parser.add_argument('--patience', type=int, default=5)
+    parser.add_argument('--grid-search', type=str2bool, default=False)
+    parser.add_argument('--cv', type=int, default=5)
+    parser.add_argument('--components', type=str, default='C1,C2,C3,C4',
+                        help='Comma-separated components to use: C1=structural, C2=PCA features, C3=row-prop, C4=sym-prop')
     return parser.parse_args()
 
 
@@ -122,15 +125,19 @@ def main():
             labels_ = labels[nodes]
             return (pred_.argmax(dim=1) == labels_).float().mean().item()
 
+        components = [c.strip() for c in args.components.split(',')]
         model = load_model(
                 num_nodes=features.size(0),
                 num_features=features.size(1),
-                num_classes=labels.max().item() + 1
+                num_classes=labels.max().item() + 1,
+                components=components
             ).to(device)
         model.preprocess(features, edge_index, labels, device)
-        model.feature_size()
 
         def grid_search(args, model, features, labels, trn_nodes, val_nodes):
+            if not args.grid_search:
+                return (1e-3, 1e-3)
+
             search_range_1 = [1e-3, 1e-4, 1e-5]
             search_range_2 = [1e-3, 1e-4, 1e-5, 1e-6]
 
@@ -148,12 +155,12 @@ def main():
                             val_nodes=val_nodes,
                             lambda_1=lambda_1,
                             lambda_2=lambda_2)
-                    val_acc_dict[(lambda_1, lambda_2)] = acc      
+                    val_acc_dict[(lambda_1, lambda_2)] = acc
 
             return max(val_acc_dict, key=val_acc_dict.get)
 
         acc_arr = []
-        for i in tqdm(range(5)):
+        for i in tqdm(range(args.cv)):
             if dataset[:9] == 'synthetic':
                 trn_nodes, val_nodes, test_nodes = split_nodes(labels.cpu(), ratio=(0.6, 0.2, 0.2), seed=i)
             else:

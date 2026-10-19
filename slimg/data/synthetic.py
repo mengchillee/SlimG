@@ -2,9 +2,8 @@ import math
 
 import torch
 from torch import spmm
-from torch_geometric.data import InMemoryDataset, Data
 
-from models.utils import normalize_adj
+from ..models.utils import normalize_adj
 
 CASES = [
     ('random', 'clustered', 'homophily'),
@@ -116,11 +115,17 @@ def assign_balanced_labels(scores):
     return labels
 
 
-class Synthetic(InMemoryDataset):
+class _SyntheticData:
+    def __init__(self, x, edge_index, y):
+        self.x = x
+        self.edge_index = edge_index
+        self.y = y
+
+
+class Synthetic:
     def __init__(self, num_nodes=6000, num_features=500, num_classes=4,
                  x_type='semantic', e_type='clustered', y_type='homophily',
                  edge_density=0.01, edge_noise=0.4, feature_noise=0.):
-        super().__init__()
         torch.manual_seed(0)
 
         self.num_nodes = num_nodes
@@ -140,11 +145,14 @@ class Synthetic(InMemoryDataset):
         y = self.make_labels()
         x = self.make_features(edge_index, y, num_features)
 
-        self.data = Data(x, edge_index, y=y)
+        self.data = _SyntheticData(x, edge_index, y=y)
 
     @property
     def num_classes(self):
         return self.num_classes_
+
+    def __getitem__(self, idx):
+        return self.data
 
     def pick_class_pairs(self):
         assert self.num_classes % 2 == 0

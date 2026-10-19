@@ -1,0 +1,17 @@
+# Downloaded datasets (fetched automatically at runtime)
+data/*
+!data/sample_graph/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+
+# Outputs
+out/
+
+# Local tooling
+.claude/

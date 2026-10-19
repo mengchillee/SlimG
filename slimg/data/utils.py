@@ -13,8 +13,8 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.utils import is_undirected, to_undirected
 from torch_geometric.data import Data
 
-from data.synthetic import Synthetic
-from utils import ROOT
+from .synthetic import Synthetic
+from ..utils import ROOT
 
 
 def print_data_stats(features, edge_index, labels):
@@ -86,7 +86,10 @@ def load_data(name, root=f'{ROOT}/data', verbose=False):
         os.makedirs(root)
 
     if name in ['arxiv', 'products']:
+        _orig_load = torch.load
+        torch.load = lambda *a, **kw: _orig_load(*a, **{**kw, 'weights_only': False})
         graph = PygNodePropPredDataset('ogbn-' + name, root)
+        torch.load = _orig_load
         graph.data.y = graph.data.y.view(-1)
         x = graph.data.x.numpy()
         for i in range(len(x)):

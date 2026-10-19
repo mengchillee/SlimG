@@ -39,11 +39,124 @@ We also explain the reasons for its success, thanks to our three additional cont
 
 
 ## Usage
-The code is written in Python 3.10.8 and built on a number of packages.
 
-Please see "requirements.txt" for the package details.
+### Installation
 
-To run the code, you can simply use the following comment:
-`python src/main.py`
+**With pip:**
+```bash
+pip install .
+```
+
+**With conda (alternative):**
+```bash
+bash run_install.sh conda
+conda activate slimg
+```
+
+**With uv (alternative):**
+```bash
+bash run_install.sh uv
+source .venv/bin/activate
+```
+
+### Running SlimG on a single graph
+
+```bash
+slimg [OPTIONS]
+# or: python -m slimg.slimg [OPTIONS]
+```
+
+SlimG accepts either a PyG dataset name or CSV files:
+
+```bash
+# PyG dataset
+slimg --dataset cora
+
+# CSV files
+slimg --edges data/sample_graph/edges.csv --features data/sample_graph/node_features.csv --labels data/sample_graph/labels.csv
+```
+
+### Running all experiments
+
+```bash
+slimg-experiments [OPTIONS]
+# or: python -m slimg.run_all_experiments [OPTIONS]
+```
 
 The datasets will be automatically downloaded when running for the first time.
+
+### Arguments (slimg)
+
+| Argument | Type | Default | Description |
+|---|---|---|---|
+| `--dataset` | str | `None` | Name of a PyG dataset (e.g., cora, citeseer) |
+| `--edges` | str | `None` | Path to edges CSV file |
+| `--features` | str | `None` | Path to node features CSV file |
+| `--labels` | str | `None` | Path to node labels CSV file |
+| `--out` | str | `out/temp` | Output directory |
+| `--verbose` | bool | `False` | Print training logs |
+| `--seed` | int | `0` | Random seed |
+| `--max-epochs` | int | `100` | Maximum training epochs |
+| `--patience` | int | `5` | Early stopping patience |
+| `--grid-search` | bool | `False` | Enable grid search over regularization hyperparameters |
+| `--cv` | int | `5` | Number of cross-validation splits |
+| `--train-ratio` | float | `0.6` | Training set ratio |
+| `--val-ratio` | float | `0.2` | Validation set ratio |
+| `--components` | str | `C1,C2,C3,C4` | Comma-separated model components to use |
+
+### Datasets
+
+SlimG supports three categories of datasets via `--dataset`:
+
+**Homophily graphs:**
+`cora`, `citeseer`, `pubmed`, `computers`, `photo`, `arxiv`, `products`
+
+**Heterophily graphs:**
+`chameleon`, `squirrel`, `actor`, `penn94`, `twitch`, `pokec`
+
+**Synthetic graphs** (proposed in the paper as sanity checks):
+
+| Dataset name | Features (x) | Edges (e) | Labels (y) |
+|---|---|---|---|
+| `synthetic-semantic-uniform-individual` | Semantic | Uniform | Individual |
+| `synthetic-random-clustered-homophily` | Random | Clustered | Homophily |
+| `synthetic-random-bipartite-heterophily` | Random | Bipartite | Heterophily |
+| `synthetic-structural-clustered-homophily` | Structural | Clustered | Homophily |
+| `synthetic-structural-bipartite-heterophily` | Structural | Bipartite | Heterophily |
+| `synthetic-semantic-clustered-homophily` | Semantic | Clustered | Homophily |
+| `synthetic-semantic-bipartite-heterophily` | Semantic | Bipartite | Heterophily |
+
+The synthetic graphs are generated on-the-fly (6000 nodes, 500 features, 4 classes by default) and cover seven scenarios to reveal the strengths and weaknesses of different GNNs.
+
+### Components
+
+SlimG uses four feature components, which can be selected via `--components`:
+
+| Component | Description |
+|---|---|
+| `C1` | Structural features (SVD of adjacency matrix) |
+| `C2` | PCA of original node features |
+| `C3` | Row-normalized propagated features (no self-loops) |
+| `C4` | Symmetrically-normalized propagated features (with self-loops) |
+
+### Examples
+
+```bash
+# Run SlimG on a PyG dataset
+slimg --dataset cora --grid-search True --cv 5
+
+# Run SlimG on CSV files
+slimg --edges data/sample_graph/edges.csv --features data/sample_graph/node_features.csv --labels data/sample_graph/labels.csv
+
+# Use only structural and PCA features
+slimg --dataset cora --components C1,C2
+
+# Use only propagated features
+slimg --dataset cora --components C3,C4
+
+# Run on a synthetic graph
+slimg --dataset synthetic-semantic-clustered-homophily
+
+# Run all experiments (original batch mode)
+slimg-experiments --grid-search True --cv 5
+```
